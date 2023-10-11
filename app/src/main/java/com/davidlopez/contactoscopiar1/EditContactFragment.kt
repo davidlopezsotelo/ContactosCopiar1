@@ -10,7 +10,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
-import com.davidlopez.contactoscopiar1.R
 import com.davidlopez.contactoscopiar1.databinding.FragmentEditNotaBinding
 import com.google.android.material.snackbar.Snackbar
 import java.util.concurrent.LinkedBlockingQueue
@@ -18,7 +17,7 @@ import java.util.concurrent.LinkedBlockingQueue
 class EditContactFragment : Fragment() {
 
 
-    private var mActivity:MainActivity?=null
+    private var mActivity:ContactosActivity?=null
     private lateinit var mBinding: FragmentEditNotaBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,7 +35,7 @@ class EditContactFragment : Fragment() {
         * ir a la carpeta res/values/themes/themes.xml
         * y borrar donde pone NoActionBar, en la linea 3
         * */
-        mActivity=activity as? MainActivity
+        mActivity=activity as? ContactosActivity
         mActivity?.supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         //configuramos el titulo
@@ -63,12 +62,14 @@ class EditContactFragment : Fragment() {
             R.id.action_save -> {
                 //cambiar entity a contactosEntity*************
 
-                val contacto=NotasEntity(name = mBinding.etName.text.toString().trim())
+                val contacto=ContactosEntity(name = mBinding.etName.text.toString().trim(),
+                    email = mBinding.etEmail.text.toString(),
+                    phone = mBinding.etPhone.text.toString().toInt())
 
                 val queue =LinkedBlockingQueue<Long?>()
                 Thread{
                     hideKeyboard()//para ocultar el teclado
-                    val id =NotasApp.db.notasDao().addNota(contacto)// añadir id al contacto para poder ser actualizado
+                    val id =ContactosApp.db.contactosDao().addNota(contacto)// añadir id al contacto para poder ser actualizado
                     queue.add(id)
                 }.start()
 

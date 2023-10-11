@@ -1,18 +1,15 @@
 package com.davidlopez.contactoscopiar1
 
-import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.inputmethod.InputMethodManager
 import androidx.recyclerview.widget.GridLayoutManager
-import com.davidlopez.contactoscopiar1.R
 import com.davidlopez.contactoscopiar1.databinding.ActivityMainBinding
 import java.util.concurrent.LinkedBlockingQueue
 
-class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
+class ContactosActivity : AppCompatActivity(),OnClickListenerContactos,ContactosAux {
 
     private lateinit var mBinding: ActivityMainBinding
-    private lateinit var mAdapter: NotasAdapter
+    private lateinit var mAdapter: ContactosAdapter
     private lateinit var mGridLayout: GridLayoutManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,7 +23,7 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
         mBinding.btnSave.setOnClickListener {
 
             //creamos la nota desde el editText
-            val nota=NotasEntity(name = mBinding.etName.text.toString())
+            val nota=ContactosEntity(name = mBinding.etName.text.toString(), phone = 0, email = "")
 
 //INSERTAR EN BASE DE DATOS-----------------------------------------------------------------------
 
@@ -34,7 +31,7 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
             Thread {
 
                 //hacemos que la nota creada se inserte en la base de datos
-                NotasApp.db.notasDao().addNota(nota)
+                ContactosApp.db.contactosDao().addNota(nota)
             }.start()
             mAdapter.add(nota)// añadimos la nota con el adaptador
         }
@@ -61,7 +58,7 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
     }
 
     private fun setupRecyclerView() {
-        mAdapter= NotasAdapter(mutableListOf(),this)
+        mAdapter= ContactosAdapter(mutableListOf(),this)
         mGridLayout= GridLayoutManager(this,2)//numero de elementos por columna
         getNotas()
         mBinding.reciclerView.apply {
@@ -76,11 +73,11 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
     private fun getNotas(){
 
         //configuramos una cola "queue"para aceptar los tipos de datos
-        val queue=LinkedBlockingQueue<MutableList<NotasEntity>>()
+        val queue=LinkedBlockingQueue<MutableList<ContactosEntity>>()
 
         //abrimos un segundo hilo para que la app no pete.
         Thread {
-            val notas = NotasApp.db.notasDao().getAllNotas()// consultamos a la base de datos
+            val notas = ContactosApp.db.contactosDao().getAllNotas()// consultamos a la base de datos
 
             // añadimos las consultas a la cola
             queue.add(notas)
@@ -93,32 +90,42 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
     /*
     * OnClickListener
     * */
-    override fun onClick(notasEntity: NotasEntity) {
+    override fun onClick(contactosEntity: ContactosEntity) {
 
     }
 
-    //actualizar registro
-    override fun onFavoriteNota(notasEntity: NotasEntity) {
-        notasEntity.isFaborite=!notasEntity.isFaborite
+    override fun onFavoriteContacto(contactosEntity: ContactosEntity) {
+        val queue=LinkedBlockingQueue<ContactosEntity>()
 
-        val queue=LinkedBlockingQueue<NotasEntity>()
+        //insertar actualizacion en base de datos   REVISAR
+        Thread{
+            ContactosApp.db.contactosDao().updateNota(contactosEntity)
+            queue.add(contactosEntity)
+        }.start()
+        mAdapter.update(queue.take())
+    }
+
+    //actualizar registro
+    fun onFavoriteNota(contactosEntity: ContactosEntity) {
+
+        val queue=LinkedBlockingQueue<ContactosEntity>()
 
         //insertar actualizacion en base de datos
         Thread{
-            NotasApp.db.notasDao().updateNota(notasEntity)
-            queue.add(notasEntity)
+            ContactosApp.db.contactosDao().updateNota(contactosEntity)
+            queue.add(contactosEntity)
         }.start()
         mAdapter.update(queue.take())
     }
 
     //borrar registro
 
-    override fun onDeleteNota(notasDB: NotasEntity) {
+    override fun onDeleteContacto(notasDB: ContactosEntity) {
 
-        val queue=LinkedBlockingQueue<NotasEntity>()
+        val queue=LinkedBlockingQueue<ContactosEntity>()
 
         Thread{
-            NotasApp.db.notasDao().deleteAll(notasDB)
+            ContactosApp.db.contactosDao().deleteAll(notasDB)
             queue.add(notasDB)
         }.start()
         mAdapter.delete(queue.take())
@@ -131,11 +138,11 @@ class MainActivity : AppCompatActivity(),OnClickListener,MainAux {
        if (isVisible)mBinding.fab.show() else mBinding.fab.hide()
     }
 
-    override fun addContact(notasEntity: NotasEntity) {
-        mAdapter.add(notasEntity)
+    override fun addContact(contactosEntity: ContactosEntity) {
+        mAdapter.add(contactosEntity)
     }
 
-    override fun updateContact(notasEntity: NotasEntity) {
+    override fun updateContact(contactosEntity: ContactosEntity) {
         // añadir un
     }
 

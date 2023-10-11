@@ -5,11 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.davidlopez.contactoscopiar1.R
 import com.davidlopez.contactoscopiar1.databinding.ItemStoreBinding
 
-class NotasAdapter(private var notas:MutableList<NotasEntity>, private var listener: OnClickListener):
-    RecyclerView.Adapter<NotasAdapter.ViewHolder>() {
+class ContactosAdapter(private var notas:MutableList<ContactosEntity>, private var listener: OnClickListenerContactos):
+    RecyclerView.Adapter<ContactosAdapter.ViewHolder>() {
 
     private lateinit var mContex:Context
 
@@ -28,32 +27,32 @@ class NotasAdapter(private var notas:MutableList<NotasEntity>, private var liste
         with(holder){
             setListener(notas)
             binding.tvName.text=notas.name
-            binding.cbNotas.isChecked=notas.isFaborite
+            //binding.cbNotas.isChecked=notas.isFaborite
         }
 
     }
 
-    fun add(nota: NotasEntity) {    //REPARAR O MEJORAR??????
+    fun add(nota: ContactosEntity) {    //REPARAR O MEJORAR??????
         if (!notas.contains(nota))
         {notas.add(nota)
         notifyItemInserted(notas.size-1)}
     }
 
-    fun setNotas(notas: MutableList<NotasEntity>) {
+    fun setNotas(notas: MutableList<ContactosEntity>) {
         this.notas=notas
         notifyDataSetChanged()
     }
 
-    fun update(notasEntity: NotasEntity) {
-        val index=notas.indexOf(notasEntity)
+    fun update(contactosEntity: ContactosEntity) {
+        val index=notas.indexOf(contactosEntity)
         if (index!=-1){
-            notas.set(index,notasEntity)
+            notas.set(index,contactosEntity)
             notifyItemChanged(index)
         }
     }
 
-    fun delete(notasEntity: NotasEntity) {
-        val index=notas.indexOf(notasEntity)
+    fun delete(contactosEntity: ContactosEntity) {
+        val index=notas.indexOf(contactosEntity)
         if (index!=-1){
             notas.removeAt(index)
             notifyItemRemoved(index)
@@ -63,19 +62,19 @@ class NotasAdapter(private var notas:MutableList<NotasEntity>, private var liste
     inner class ViewHolder(view: View):RecyclerView.ViewHolder(view){
         val binding=ItemStoreBinding.bind(view)
 
-        fun setListener(notasEntity: NotasEntity){
+        fun setListener(contactosEntity: ContactosEntity){
 
             with(binding.root) {
-                setOnClickListener { listener.onClick(notasEntity) }
+                setOnClickListener { listener.onClick(contactosEntity) }
 
                 //TODO CAMBIAR PARA MENU TOAST CON OPCION BORRAR O ENVIAR
                 setOnLongClickListener {
-                    listener.onDeleteNota(notasEntity)
+                    listener.onDeleteContacto(contactosEntity)
                     true
                 }
             }
 
-            binding.cbNotas.setOnClickListener { listener.onFavoriteNota(notasEntity) }
+            //binding.cbNotas.setOnClickListener { listener.onFavoriteNota(contactosEntity) }
 
 
 
